@@ -6,6 +6,10 @@ const useConversation = create((set) => ({
     set({ selectedConversation }),
   messages: [],
   setMessages: (messages) => set({ messages }),
+  sidebarPage: "friends",
+  setSidebarPage: (sidebarPage) => set({ sidebarPage }),
+  searchInput: " ",
+  setSearchInput: (searchInput) => set({ searchInput }),
 }));
 
 export default useConversation;
