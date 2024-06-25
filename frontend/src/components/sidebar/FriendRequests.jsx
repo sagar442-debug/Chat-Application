@@ -5,17 +5,19 @@ import { getRandomEmoji } from "../../utils/emojis";
 import FriendList from "./FriendList";
 import useFindConversations from "../../hooks/useFindConversations";
 import useConversation from "../../zustand/useConversation";
+import usePendingRequests from "../../hooks/usePendingRequests";
+import FriendRequestList from "./FriendRequestList";
 
-const FindFriends = () => {
+const FriendRequests = () => {
   const { searchInput } = useConversation();
-  const { loading, conversations } = useFindConversations(searchInput);
+  const { loading, conversations } = usePendingRequests();
   console.log(conversations);
   return (
     <>
-      <h2 className="px-3 ">Find Others:</h2>
+      <h2 className="px-3 ">Requests:</h2>
       <div className="py-2 flex flex-col overflow-auto">
         {conversations.map((conversation, idx) => (
-          <FriendList
+          <FriendRequestList
             key={conversation._id}
             conversation={conversation}
             emoji={getRandomEmoji()}
@@ -30,4 +32,4 @@ const FindFriends = () => {
   );
 };
 
-export default FindFriends;
+export default FriendRequests;

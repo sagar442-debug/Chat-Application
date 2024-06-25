@@ -1,19 +1,20 @@
+import { FaCheck, FaRegTimesCircle } from "react-icons/fa";
 import { useSocketContext } from "../../context/SocketContext";
 import AddFriend from "../../hooks/AddFriend";
 import useConversation from "../../zustand/useConversation";
-import { IoPersonAddSharp } from "react-icons/io5";
+import AcceptFriendRequest from "../../hooks/AcceptFriendRequest";
 
-const FriendList = ({ conversation, lastIdx, emoji }) => {
+const FriendRequestList = ({ conversation, lastIdx, emoji }) => {
   const { selectedConversation, setSelectedConversation } = useConversation();
 
   const isSelected = selectedConversation?._id === conversation._id;
-  const { loading, addingFriend } = AddFriend(conversation._id);
+  const { loading, acceptFriendRequest } = AcceptFriendRequest();
   const { onlineUsers } = useSocketContext();
   const isOnline = onlineUsers.includes(conversation._id);
 
   const onAdd = async (e) => {
     e.preventDefault();
-    await addingFriend(conversation._id);
+    await acceptFriendRequest(conversation._id);
   };
 
   return (
@@ -33,13 +34,17 @@ const FriendList = ({ conversation, lastIdx, emoji }) => {
         <div className="flex flex-col flex-1">
           <div className="flex gap-3 justify-between">
             <p className="font-bold text-gray-200">{conversation.fullName}</p>
-
-            <div className="flex items-center ">
-              <button onClick={onAdd}>
-                <IoPersonAddSharp />
+            <div className="flex items-center text-xl space-x-3 ">
+              <button
+                onClick={onAdd}
+                className="hover:bg-black hover:bg-opacity-30 hover:rounded-full hover:p-1"
+              >
+                <FaCheck className="text-green-400" />
               </button>
-              <button></button>
-            </div>
+              <button className="hover:bg-black hover:bg-opacity-30 hover:rounded-full hover:p-1">
+                <FaRegTimesCircle className="text-red-500" />
+              </button>
+            </div>{" "}
           </div>
         </div>
       </div>
@@ -49,4 +54,4 @@ const FriendList = ({ conversation, lastIdx, emoji }) => {
   );
 };
 
-export default FriendList;
+export default FriendRequestList;

@@ -76,13 +76,30 @@ const addFriendById = async (req, res) => {
     await User.findByIdAndUpdate(friendId, {
       $addToSet: { pendingRequests: loggedInUserId },
     });
-    await User.findByIdAndUpdate(loggedInUserId, {
-      $addToSet: { pendingRequests: friendId },
-    });
+    // await User.findByIdAndUpdate(loggedInUserId, {
+    //   $addToSet: { pendingRequests: friendId },
+    // });
 
     res.status(200).json({ message: "Friend request sent successfully" });
   } catch (error) {
     console.error("Error sending friend request:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getPendingRequests = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId)
+      .populate("pendingRequests", "fullName profilePic") // Populate with user's name and profile picture
+      .select("pendingRequests"); // Only select the pendingRequests field
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(user.pendingRequests);
+  } catch (error) {
+    console.log("Error fetching pending requests:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -147,4 +164,5 @@ export {
   getUsersByName,
   addFriendById,
   acceptFriendRequestById,
+  getPendingRequests,
 };

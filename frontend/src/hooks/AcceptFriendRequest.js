@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const useAddFriend = () => {
-  const [loading, setLoading] = useState(false);
+const AcceptFriendRequest = () => {
+  const [loading, setLoading] = useState();
 
-  const addingFriend = async (friendId) => {
-    // Ensure friendId is used here
+  const acceptFriendRequest = async (requestId) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/users/add-friend", {
-        // Ensure correct API endpoint
+      const res = await fetch("/api/users/accept-friend", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ friendId }),
+        body: JSON.stringify({ requestId }),
       });
 
       const data = await res.json();
+
       if (data.error) {
         throw new Error(data.error);
       }
@@ -29,8 +28,7 @@ const useAddFriend = () => {
       setLoading(false);
     }
   };
-
-  return { loading, addingFriend };
+  return { loading, acceptFriendRequest };
 };
 
-export default useAddFriend;
+export default AcceptFriendRequest;
