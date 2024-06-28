@@ -9,9 +9,7 @@ import usePendingRequests from "../../hooks/usePendingRequests";
 import FriendRequestList from "./FriendRequestList";
 
 const FriendRequests = () => {
-  const { searchInput } = useConversation();
   const { loading, conversations } = usePendingRequests();
-  console.log(conversations);
   return (
     <>
       <h2 className="px-3 ">Requests:</h2>

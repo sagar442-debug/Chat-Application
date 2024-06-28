@@ -15,6 +15,7 @@ const FriendRequestList = ({ conversation, lastIdx, emoji }) => {
   const onAdd = async (e) => {
     e.preventDefault();
     await acceptFriendRequest(conversation._id);
+    window.location.reload();
   };
 
   return (

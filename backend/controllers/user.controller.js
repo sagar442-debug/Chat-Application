@@ -34,22 +34,30 @@ const getUsersByName = async (req, res) => {
   const loggedInUserId = req.user._id;
 
   try {
-    let filteredUsers;
+    // Fetch the logged-in user to get their friends list
+    const loggedInUser = await User.findById(loggedInUserId).select("friends");
 
-    // Check if the name parameter is an empty string
-    if (name === "") {
-      // Fetch all users excluding the logged-in user
-      filteredUsers = await User.find({
-        _id: { $ne: loggedInUserId },
-      }).select("-password");
-    } else {
-      // Find users with matching name (case-insensitive) and excluding the logged-in user
-      filteredUsers = await User.find({
-        _id: { $ne: loggedInUserId }, // Exclude logged-in user
-        fullName: { $regex: new RegExp(name, "i") }, // Case-insensitive search
-      }).select("-password");
+    if (!loggedInUser) {
+      return res.status(404).json({ error: "User not found" });
     }
 
+    const friendsList = loggedInUser.friends;
+
+    let filteredUsers;
+
+    // Build the query object based on whether a name is provided
+    const query = {
+      _id: { $ne: loggedInUserId, $nin: friendsList }, // Exclude logged-in user and friends
+    };
+
+    if (name !== "") {
+      query.fullName = { $regex: new RegExp(name, "i") }; // Case-insensitive search by name
+    }
+
+    // Fetch users matching the query, excluding the password field
+    filteredUsers = await User.find(query).select("-password");
+
+    // Send the filtered users as response
     res.status(200).json(filteredUsers);
   } catch (error) {
     console.log("Error in getUsersByName", error);

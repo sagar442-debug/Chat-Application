@@ -26,7 +26,7 @@ const Sidebar = () => {
             }`}
           >
             <button onClick={() => setSidebarPage("friends")}>
-              <FaUsers />
+              <FaAddressBook />
             </button>
           </div>
           <div
@@ -35,7 +35,7 @@ const Sidebar = () => {
             }`}
           >
             <button onClick={() => setSidebarPage("FindFriends")}>
-              <FaAddressBook />
+              <FaUsers />
             </button>
           </div>
           <div
