@@ -6,7 +6,9 @@
   "scripts": {
     "server": "nodemon backend/server.js",
     "client": "cd frontend && npm run dev",
-    "start": "concurrently \"npm run server\" \"npm run client\""
+    "both": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node backend/server.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "type": "module",
   "keywords": [],
@@ -19,6 +21,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.3",
+    "react-webcam": "^7.2.0",
     "socket.io": "^4.7.5"
   },
   "devDependencies": {

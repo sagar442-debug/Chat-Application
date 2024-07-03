@@ -39,39 +39,20 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 
-  // WebRTC signaling: handle offer
-  socket.on("call-offer", ({ offer, receiverId }) => {
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("call-offer", { offer, callerId: userId });
-    }
+  socket.on("callUser", (data) => {
+    io.to(data.userToCall).emit("callUser", {
+      signal: data.signalData,
+      from: data.from,
+      name: data.name,
+    });
   });
 
-  // WebRTC signaling: handle answer
-  socket.on("call-answer", ({ answer, callerId }) => {
-    const callerSocketId = getReceiverSocketId(callerId);
-    if (callerSocketId) {
-      io.to(callerSocketId).emit("call-answer", { answer, receiverId: userId });
-    }
+  socket.on("answerCall", (data) => {
+    io.to(data.to).emit("callAccepted", data.signal);
   });
 
-  // WebRTC signaling: handle ICE candidates
-  socket.on("ice-candidate", ({ candidate, receiverId }) => {
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("ice-candidate", {
-        candidate,
-        senderId: userId,
-      });
-    }
-  });
-
-  // Optional: Handle call end/disconnection
-  socket.on("call-end", ({ receiverId }) => {
-    const receiverSocketId = getReceiverSocketId(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("call-end", { senderId: userId });
-    }
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded");
   });
 });
 

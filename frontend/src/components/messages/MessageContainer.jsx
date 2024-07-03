@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useConversation from "../../zustand/useConversation";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
@@ -11,27 +11,34 @@ import { BsFillMicMuteFill } from "react-icons/bs";
 import { MdCallEnd } from "react-icons/md";
 import useCallingUser from "../../zustand/useCallingUser.js";
 import { ImCross } from "react-icons/im";
-
+import ReactWebcam from "react-webcam";
+import { io } from "socket.io-client";
+import IncomingCall from "./IncomingCall.jsx";
 const MessageContainer = () => {
   const { selectedConversation, setSelectedConversation } = useConversation();
-  const { setIsCalling, isCalling, setCurrentUser, currentUser } =
-    useCallingUser();
-
+  const {
+    setIsCalling,
+    isCalling,
+    setCurrentUser,
+    currentUser,
+    setContinuingCall,
+    continuingCall,
+  } = useCallingUser();
   useEffect(() => {
     if (currentUser !== selectedConversation) {
       setIsCalling(false);
-    } else {
-      setIsCalling(true);
     }
   }, [selectedConversation]);
 
   const onCall = () => {
-    if (isCalling == true) {
+    if (isCalling) {
       setIsCalling(false);
       setCurrentUser(null);
+      setContinuingCall(false);
     } else {
       setCurrentUser(selectedConversation);
       setIsCalling(true);
+      setContinuingCall(true);
     }
   };
 
@@ -71,7 +78,10 @@ const MessageContainer = () => {
               </div>
             )}
           </div>
-          {isCalling ? <CallOption /> : ""}
+          {continuingCall && (
+            <CallOption className={`${isCalling ? "" : "hidden"}`} />
+          )}
+          {/* <IncomingCall /> */}
 
           {isCalling ? "" : <Messages />}
           {isCalling ? "" : <MessageInput />}
@@ -95,21 +105,52 @@ const NoChatSelected = () => {
   );
 };
 
-const CallOption = () => {
-  const { isCalling, setIsCalling, setCurrentUser } = useCallingUser();
+// Call option component
 
-  const onEndCall = () => {
-    if (isCalling) {
-      setIsCalling(false);
-    } else {
-      setIsCalling(true);
+const CallOption = () => {
+  const {
+    isCalling,
+    setIsCalling,
+    setCurrentUser,
+    setContinuingCall,
+    continuingCall,
+    currentUser,
+  } = useCallingUser();
+  const { selectedConversation, setSelectedConversation } = useConversation();
+
+  const socket = useRef(null);
+  const localStream = useRef(null);
+  const remoteVideoRef = useRef(null);
+  const webcamRef = useRef(null);
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  };
+
+  const endCall = () => {
+    socket.disconnect();
+
+    // Stop local media stream
+    const stream = webcamRef.current.srcObject;
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach((track) => track.stop());
+      webcamRef.current.srcObject = null;
     }
   };
 
+  const onEndCall = () => {
+    setIsCalling(false);
+    setContinuingCall(false);
+    endCall();
+  };
+
   return (
-    <div className="flex-1  ">
+    <div className="flex-1">
       <div className="h-full flex flex-col justify-center items-center bg-[#2c343d]">
-        <div className="bg-black w-full h-[300px]">bg video</div>
+        <div className="bg-black w-full h-[300px]">Remote video display</div>
         <div className="flex space-x-3 mt-2">
           <button className="bg-blue-400 hover:bg-blue-500 duration-100 transition-all rounded-full p-2">
             <FaVideo className="text-white" />
@@ -125,7 +166,17 @@ const CallOption = () => {
           </button>
         </div>
       </div>
-      <div className="relative w-32 h-20 bottom-52 -right-80 bg-blue-500 "></div>
+      <div className="relative w-36 h-20 bottom-52 -right-80">
+        {continuingCall && (
+          <ReactWebcam
+            ref={webcamRef}
+            audio={false}
+            videoConstraints={videoConstraints}
+            className="w-[28rem]"
+            autoPlay
+          />
+        )}
+      </div>
     </div>
   );
 };
